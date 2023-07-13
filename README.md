@@ -1,6 +1,6 @@
 # Docutain SDK
 
-## Docutain SDK example app for Windows (Forms)
+## Docutain SDK example app for React Native
 
 This example app shows how to integrate the [Docutain SDK for React Native](https://sdk.Docutain.com).
 
