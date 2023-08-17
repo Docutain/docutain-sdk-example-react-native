@@ -36,9 +36,10 @@ react-native run-android
 
 ## License and Support
 
-The Docutain SDK is a commercial product and requires a paid license for production use. In order to get a trial license, please contact us via [sdk@Docutain.com](mailto:sdk@Docutain.com). If you need technical support of any kind, please contact us via [support.sdk@Docutain.com](mailto:support.sdk@Docutain.com).
+The Docutain SDK is a commercial product and requires a paid license for production use. In order to get a trial license, please visit our website via [https://sdk.docutain.com/TrialLicense](https://sdk.docutain.com/TrialLicense?Source=2621703) to generate a trial license key. 
 
-To run the app you need a trial license.
+If you need technical support of any kind, please contact us via [support.sdk@Docutain.com](mailto:support.sdk@Docutain.com).
+
 
 
 
