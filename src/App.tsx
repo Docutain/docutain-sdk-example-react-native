@@ -7,7 +7,8 @@
 */
 
 import React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
+import {Alert, Linking, BackHandler } from 'react-native';
+import {NavigationContainer } from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {HomeScreen} from './Components/HomeScreen';
@@ -17,6 +18,7 @@ import {ErrorHandlingUtils} from './Components/ErrorHandlingUtils';
 import DocutainSDK, {AnalyzeConfiguration} from '@docutain/react-native-docutain-sdk';
 
 const Stack = createNativeStackNavigator();
+const License_Key = "<YOUR_LICENSE_KEY_HERE>";
 
 export class App extends React.Component {
   constructor(props: any) {
@@ -24,13 +26,34 @@ export class App extends React.Component {
     this.InitDocutainSDK();
 }
 
+   async showTrialLicenseAlert() {    
+    Alert.alert("Error","A valid trial license key is required. You can generate a trial license key for\n\ncom.docutain_sdk_example_react_native\n\non our website.",[
+      {
+        text: 'Cancel',
+        onPress: () => BackHandler.exitApp(),
+        style: 'cancel',
+      },
+      {text: 'Get trial license', 
+          onPress: () => {
+              Linking.openURL('https://sdk.docutain.com/TrialLicense?Source=2621959');
+              BackHandler.exitApp();
+            }
+      },
+    ]);         
+  }
+
    async InitDocutainSDK() {
     try {
       // the Docutain SDK needs to be initialized prior to using any functionality of it
       // a valid license key is required (contact us via [mailto:sdk@Docutain.com] to get a trial license and replace <YOUR_LICENSE_KEY_HERE>
-      if(!await DocutainSDK.initSDK("<YOUR_LICENSE_KEY_HERE>")){
+      if(!await DocutainSDK.initSDK(License_Key)){
+        if(License_Key == "<YOUR_LICENSE_KEY_HERE>"){
+          //init of Docutain SDK failed, no trial license provided
+          await this.showTrialLicenseAlert();
+        } else{
           //init of Docutain SDK failed, get the last error message
           return await ErrorHandlingUtils.DocutainError('initSDK');
+        }
       }
 
       //If you want to use text detection (OCR) and/or data extraction features, you need to set the AnalyzeConfiguration
