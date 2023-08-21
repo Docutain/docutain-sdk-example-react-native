@@ -86,21 +86,24 @@ export class App extends React.Component {
   render() {
     return (
     <NavigationContainer>
-       <Stack.Navigator>
+       <Stack.Navigator
+        screenOptions={{
+          headerBackTitleVisible: false,
+        }}>
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{title: 'Docutain SDK Example', headerStyle: {backgroundColor: 'green'}, headerTintColor: 'white'}}
+          options={{title: 'Docutain SDK Example', headerStyle: {backgroundColor: '#4caf50'}, headerTintColor: 'white'}}
         />
         <Stack.Screen 
           name="AnalyzeResult" 
           component={AnalyzeResultScreen} 
-          options={{title: 'Docutain SDK - AnalyzeResult', headerStyle: {backgroundColor: 'green'}, headerTintColor: 'white'}}
+          options={{title: 'Docutain SDK - AnalyzeResult', headerStyle: {backgroundColor: '#4caf50'}, headerTintColor: 'white'}}
           />
         <Stack.Screen 
           name="TextResult" 
           component={TextResultScreen}
-          options={{title: 'Docutain SDK - Text', headerStyle: {backgroundColor: 'green'}, headerTintColor: 'white'}}
+          options={{title: 'Docutain SDK - Text', headerStyle: {backgroundColor: '#4caf50'}, headerTintColor: 'white'}}
           />
       </Stack.Navigator>
     </NavigationContainer>

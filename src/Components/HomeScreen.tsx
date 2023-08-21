@@ -34,7 +34,7 @@ export class HomeScreen extends React.Component  <HomescreenProps, HomescreenSta
       return (
         <View style={{flex:1}}>
 		      <Spinner size="large" visible= {this.state.showWait}/> 
-          <SelectSourceModal show={this.state.selectSourceShow} onSelectSource={(source:DocumentSource) => this.onSourceSelected(source)}></SelectSourceModal>
+          <SelectSourceModal show={this.state.selectSourceShow} onHide={() => this.setState({selectSourceShow:false})} onSelectSource={(source:DocumentSource) => this.onSourceSelected(source)}></SelectSourceModal>
           <ScrollView>
           <TouchableOpacity
             style={styles.buttonContainer}
@@ -94,15 +94,15 @@ async  onScanPageLocal() {
       const options: DocumentScannerConfiguration = {
         allowCaptureModeSetting: true, //defaults to false
         pageEditConfig: {
-          allowPageFilter: false,  //defaults to true
+          allowPageFilter: true,  //defaults to true
           allowPageRotation: true  //defaults to true
         },
 
         //detailed information about theming possibilities can be found here [https://docs.docutain.com/docs/react-native/theming]
-        ColorConfig: {
-          ColorTopBarBackground: {Light:"#0000ff", Dark:"#6495ED"},
-          ColorBottomBarBackground: {Light:"#0000ff", Dark:"#6495ED"}
-        }
+        //ColorConfig: {
+          //ColorTopBarBackground: {Light:"#0000ff", Dark:"#6495ED"},
+          //ColorBottomBarBackground: {Light:"#0000ff", Dark:"#6495ED"}
+        //}
       }
       
       //start the scanner
@@ -123,15 +123,14 @@ async  onScanPageLocal() {
 
   async onSourceSelected(source: DocumentSource){
     try {
-        this.setState({selectSourceShow:false}); 
 
         // Depending on the selected source, start the scanner or use the file picker to select a file to load
         console.log('onSourceSelected:' + source);
         if(source == DocumentSource.Dokumentenscanner)
         {
-            //see [https://docs.docutain.com/docs/react-native/docScan] for more information
-            //define a DocumentScannerConfiguration to alter the scan process  
-            const options: DocumentScannerConfiguration = {
+          //see [https://docs.docutain.com/docs/react-native/docScan] for more information
+          //define a DocumentScannerConfiguration to alter the scan process  
+          const options: DocumentScannerConfiguration = {
             allowCaptureModeSetting: true,
             pageEditConfig: {allowPageFilter: true, allowPageRotation: true}
           }
@@ -139,8 +138,9 @@ async  onScanPageLocal() {
           //start the scanner
           const rc = await DocutainSDK.scanDocument(options);
           console.log('HomeScreen onSourceSelected nach scanDocument. rc:' + rc);
-          if(!rc) ErrorHandlingUtils.DocutainError("writePDF");
-          }
+            if(!rc)
+            return;
+        }
         else
         {
           //load a file
@@ -159,12 +159,8 @@ async  onScanPageLocal() {
             this.props.navigation.push("TextResult");
             break;
           case SampleMenue.WritePDF:
-            //  
-            const rc = await this.requestExternalStoragePermission()
-            if(!rc)
-              return
             //define the output file for the PDF
-            const filePath = RNFS.DownloadDirectoryPath + "/Sample.PDF";
+            const filePath = RNFS.DocumentDirectoryPath + "/Sample.PDF";
             console.log('WritePDF filePath:' + filePath);
             //generate the PDF from the currently loaded document
             //the generated PDF also contains the detected text, making the PDF searchable

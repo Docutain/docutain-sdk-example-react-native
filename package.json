@@ -10,7 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@docutain/react-native-docutain-sdk": "^1.0.0-beta.3",
+    "@docutain/react-native-docutain-sdk": "^1.0.0",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/native-stack": "^6.9.12",
     "react": "18.2.0",

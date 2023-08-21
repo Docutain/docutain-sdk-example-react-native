@@ -26,8 +26,24 @@ npm install
 Run on Android
 
 ```
-npx
-react-native run-android
+npx react-native run-android
+```
+
+Run on iOS
+
+```
+cd ios
+pod install
+```
+
+Open the `Docutain_SDK_Example_React_Native.xcworkspace` file from the iOS folder with Xcode.
+
+Set your provisioning and signing settings.
+
+Run the app either in Xcode or via the following command.
+
+```
+npx react-native run-ios
 ```
 
 ## Documentation of the Docutain SDK

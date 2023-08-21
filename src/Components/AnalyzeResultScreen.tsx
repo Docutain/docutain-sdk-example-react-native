@@ -45,25 +45,25 @@ export class AnalyzeResultScreen extends Component {
   }    
   render() {
     return (
-      <View style={{margin:10}}>
-      <ScrollView>
       //load the text into the textfields if value is detected
-      <Input Label="Name 1" Text={this.state.address.Name1}></Input>
-      <Input Label="Name 2" Text={this.state.address.Name2}></Input>
-      <Input Label="Name 3" Text={this.state.address.Name3}></Input>
-      <Input Label="Zipcode" Text={this.state.address.Zipcode}></Input>
-      <Input Label="City" Text={this.state.address.City} ></Input>
-      <Input Label="Street" Text={this.state.address.Street} ></Input>
-      <Input Label="Phone" Text={this.state.address.Phone} ></Input>
-      <Input Label="Customer ID" Text={this.state.address.CustomerId} ></Input>
-      <Input Label="IBAN" Text={this.state.IBAN} ></Input>
-      <Input Label="BIC" Text={this.state.BIC} ></Input>
-      <Input Label="Date" Text={this.state.dataObject.Date} ></Input>
-      <Input Label="Amount" Text={this.state.dataObject.Amount} ></Input>
-      <Input Label="Invoice ID" Text={this.state.dataObject.InvoiceId} ></Input>
-      <Input Label="Reference" Text={this.state.dataObject.Reference} ></Input>
-      <Input Label="Payment State" Text={this.state.dataObject.PaymentState} ></Input>
-      </ScrollView>
+      <View style={{margin:10}}>
+        <ScrollView>
+          <Input Label="Name 1" Text={this.state.address.Name1}></Input>
+          <Input Label="Name 2" Text={this.state.address.Name2}></Input>
+          <Input Label="Name 3" Text={this.state.address.Name3}></Input>
+          <Input Label="Zipcode" Text={this.state.address.Zipcode}></Input>
+          <Input Label="City" Text={this.state.address.City} ></Input>
+          <Input Label="Street" Text={this.state.address.Street} ></Input>
+          <Input Label="Phone" Text={this.state.address.Phone} ></Input>
+          <Input Label="Customer ID" Text={this.state.address.CustomerId} ></Input>
+          <Input Label="IBAN" Text={this.state.IBAN} ></Input>
+          <Input Label="BIC" Text={this.state.BIC} ></Input>
+          <Input Label="Date" Text={this.state.dataObject.Date} ></Input>
+          <Input Label="Amount" Text={this.state.dataObject.Amount} ></Input>
+          <Input Label="Invoice ID" Text={this.state.dataObject.InvoiceId} ></Input>
+          <Input Label="Reference" Text={this.state.dataObject.Reference} ></Input>
+          <Input Label="Payment State" Text={this.state.dataObject.PaymentState} ></Input>
+        </ScrollView>
       </View>
       );
   }
