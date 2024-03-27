@@ -8,6 +8,8 @@ This example app shows how to integrate the [Docutain SDK for React Native](http
 
 The [Docutain SDK](https://SDK.docutain.com) is based on the world famous, successful document management app Docutain which is used by millions of users every month. The Docutain SDK makes it possible to integrate a high quality document scanner, text recognition (OCR), document analysis, data extraction and PDF creation functionalities into your apps. It is easy to integrate and works completely offline which ensures 100% data safety.
 
+Check out our blog article on [How to create a React Native Document Scanner](https://sdk.docutain.com/blogartikel/how-to-create-a-react-native-document-scanner).
+
 ## Getting started
 
 Clone the repo:
