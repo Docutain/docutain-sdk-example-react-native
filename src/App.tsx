@@ -20,8 +20,7 @@ import DocutainSDK, {  AnalyzeConfiguration } from '@docutain/react-native-docut
 
 
 const Stack = createNativeStackNavigator();
-//const License_Key = "<YOUR_LICENSE_KEY_HERE>";
-const License_Key = 'ja34uA2VUtgjhkuZz9MnR2t+zlTFvIWwZMYjqCNAqc4iVR09MHEecugpKQQpHmw05hgFVraC9ke4V4XVfQ/lpHUNgtQ8wxKGXLvIfB1HYnV1uKpQsAgzVKMB9xC7Z+AZBFEGzYZOjwcRLb+n';
+const License_Key = "<YOUR_LICENSE_KEY_HERE>";
 
 export class App extends React.Component {
   constructor(props: any) {
