@@ -1,0 +1,347 @@
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+- main
+
+stages:
+- stage: 'Test'
+  displayName: 'Test'
+  dependsOn: Build
+  condition:  succeeded() 
+  jobs:
+  - job: 'BuildAndroid'
+    displayName: 'Build Test App Android'
+    condition: eq(variables.DoBuildAndroid, true)
+    pool:
+     vmImage: ubuntu-latest
+
+    steps:
+#    - checkout: git://Docutain-SDK-Example-React-Native 
+    - task: NodeTool@0
+      inputs:
+       versionSpec: '18.x'
+      displayName: 'Install Node.js'
+      
+    - task: JavaToolInstaller@0
+      inputs:
+        versionSpec: '17'
+        jdkArchitectureOption: 'x64'
+        jdkSourceOption: 'PreInstalled'
+    - task: Npm@1
+      displayName: 'npm install from Feed'
+      inputs:
+        command: 'install'
+        verbose: true
+        customRegistry: 'useFeed'
+        customFeed: '922c1b3a-21ec-4e93-a785-ae06e6b57cce'
+    
+    - script: |
+        npm install -g react-native-cli
+      displayName: 'Install react-native cli'        
+    - task: CmdLine@2
+      inputs:
+        script: |
+          chmod +x ./android/gradlew
+
+    - script: |
+        npx react-native build-android --mode=release
+      displayName: 'Build release'        
+
+    - task: BrowserStackConfig@0
+      inputs:
+        BrowserStackServiceEndPoint: 'BrowserStack Connection'
+   
+    - task: BrowserStackAppUploader@0
+      inputs:
+        appPath: '$(Build.Repository.LocalPath)/android/app/build/outputs/bundle/release/app-release.aab'
+        appCustomId: 'com.docutain_sdk_example_react_native'
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Build.Repository.LocalPath)/android/app/build/outputs/bundle/release/app-release.aab'       
+        artifact: 'com.docutain_sdk_example_react_native'
+        publishLocation: 'pipeline'
+
+
+  - job: 'TestAndroid'
+    displayName: 'NUnit Test Android'
+    dependsOn: BuildAndroid
+    condition: eq(variables.DoTestAndroid, true)
+    pool:
+     vmImage: ubuntu-latest
+     
+    steps:
+#    - checkout: git://Docutain SDK/AppiumTestDocutainSDK
+  
+    - task: UseDotNet@2
+      displayName: 'Install .NET Core SDK'
+      inputs:
+        version: 5.x
+        packageType: sdk
+        performMultiLevelLookup: true
+        includePreviewVersions: true # Required for preview versions
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'build'        
+        projects: 'BrowserStack/BrowserStack.csproj'
+      displayName: 'Build NUint Test'
+    
+    - task: BrowserStackConfig@0
+      inputs:
+        BrowserStackServiceEndPoint: 'BrowserStack Connection'
+        browserstackLocal: true
+        bsLocalOptions: 'verbose'        
+    
+    - task: DownloadPipelineArtifact@2
+      continueOnError: true
+      inputs:
+        buildType: 'specific'
+        project: '17062a62-977d-4b6d-a8eb-3f67a5730b2b'
+        definition: '20'
+        specificBuildWithTriggering: true
+        buildVersionToDownload: 'latest'
+        targetPath: '$(Pipeline.Workspace)'
+
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: current
+        targetPath: '$(Pipeline.Workspace)'
+
+# file listing macos
+#    - task: CmdLine@2
+#      displayName: 'List files'
+#      inputs:
+#        script: |
+#          find -f $(Pipeline.Workspace)/*
+
+    - script: echo $BROWSERSTACK_APP_ID 
+      displayName: 'BROWSERSTACK_APP_ID 1'
+
+# file ubuntu
+    - task: CmdLine@2
+      displayName: 'List files'
+      inputs:
+        script: find $(Pipeline.Workspace)
+
+    - task: CmdLine@2
+      continueOnError: true
+      displayName: 'CreateFolder '
+      inputs:
+        script: mkdir -p $(Agent.TempDirectory)/NUnit
+
+    - task: BrowserStackAppUploader@0
+      continueOnError: true
+      inputs:
+        appPath: '$(Pipeline.Workspace)/com.docutain_sdk_example_react_native/app-release.aab'
+        appCustomId: 'com.docutain_sdk_example_react_native'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build NUint Test'
+      inputs:
+        command: 'test'
+        testRunTitle: 'Docutain.SDK.React-Native'
+        projects: 'BrowserStack/BrowserStack.csproj'
+#        arguments: '--filter FullyQualifiedName\!~ReportGeneration -- NUnit.TestOutputXml=TestXML -- NUnit.WorkDirectory=$(Agent.TempDirectory)'
+        arguments: ' -- NUnit.TestOutputXml=TestXML -- NUnit.WorkDirectory=$(Agent.TempDirectory)'
+      continueOnError: true
+      env:
+        DOCUTAIN_SDK_TESTAPP: 'react_nativeTestApp'
+        BROWSERSTACK_BUILD_NAME: azure-Docutain.SDK.React-Native-$(Build.BuildId)
+#        CAPABILITIES_FILENAME: capabilities.yml
+#        BROWSERSTACK_ANDROID_APP_ID: SimpleApp_Android
+#        BROWSERSTACK_IOS_APP_ID: SimpleApp_iOS
+#        BROWSERSTACK_APP_ID: <Test_App>
+
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'NUnit'
+        testResultsFiles: '**/B*.xml'
+        searchFolder: '$(Agent.TempDirectory)'
+        testRunTitle: 'Docutain.SDK.React-Native Android Azure Test Results'     
+
+# Wird aktuell nicht gefunden
+    - task: BrowserStackResults@1
+      inputs:
+        browserstackProduct: 'App Automate'              
+
+  - job: 'BuildiOS'
+    timeoutInMinutes: 60
+    displayName: 'Build Test App iOS'
+    condition: eq(variables.DoBuildiOS, true)
+    pool:
+     vmImage: macOS-13
+     
+    steps:
+    - checkout: git://Docutain-SDK-Example-React-Native 
+    - task: NodeTool@0
+      inputs:
+       versionSpec: '18.x'
+      displayName: 'Install Node.js'
+    - task: Npm@1
+      displayName: 'npm install from Feed'
+      inputs:
+        command: 'install'
+        verbose: true
+        customRegistry: 'useFeed'
+        customFeed: '922c1b3a-21ec-4e93-a785-ae06e6b57cce'
+    
+    - script: |
+        npm install -g react-native-cli
+      displayName: 'Install react-native cli'        
+
+#    - script: | 
+#        cd ios
+#        pod update boost --no-repo-update
+#        pod update RCT-Folly --no-repo-update
+#      displayName: 'Install react-native cli'        
+
+    - task: InstallAppleCertificate@2
+      displayName: 'Install Apple Signing Certificate'
+      inputs:
+        certSecureFile: 'DocutainDevelopment.p12'
+        certPwd: 'Dt(&bZ17x=M4'
+        keychain: 'temp'
+
+    - task: InstallAppleProvisioningProfile@1
+      displayName: 'Install Apple Provisioning Profile'
+      inputs:
+        provisioningProfileLocation: 'secureFiles'
+        provProfileSecureFile: 'WildCardDevelopment.mobileprovision'
+
+    - task: CocoaPods@0
+      inputs:
+        workingDirectory: 'ios'
+        forceRepoUpdate: false
+
+    #- script: |
+    #    npx react-native build-ios --mode=Release
+    #  displayName: 'Build release'
+
+    - task: Xcode@5
+      inputs:
+        actions: 'build archive'
+        sdk: 'iphoneos'
+        xcWorkspacePath: 'ios/Docutain_SDK_Example_React_Native.xcworkspace'
+        scheme: 'Docutain_SDK_Example_React_Native'
+        packageApp: true
+        configuration: Release 
+        exportPath: 'output'
+        exportOptions: 'specify'
+        exportTeamId: 'XTY88YGGDY'
+        signingOption: manual
+        signingIdentity: '$(APPLE_CERTIFICATE_SIGNING_IDENTITY)'
+        provisioningProfileUuid: '$(APPLE_PROV_PROFILE_UUID)'
+        xcodeVersion: default
+        teamId: 'XTY88YGGDY'
+        args: 'CODE_SIGNING_ALLOWED=No'        
+
+# file listing macos
+    - task: CmdLine@2
+      displayName: 'List files'
+      inputs:
+        script: |
+          find -f $(Build.Repository.LocalPath)/*
+    - task: BrowserStackConfig@0
+      inputs:
+        BrowserStackServiceEndPoint: 'BrowserStack Connection'
+   
+    - task: BrowserStackAppUploader@0
+      inputs:
+        appPath: '$(Build.Repository.LocalPath)/output/Docutain_SDK_Example_React_Native.ipa'
+        appCustomId: 'iOS_com.docutain_sdk_example_react_native'
+
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Build.Repository.LocalPath)/output/Docutain_SDK_Example_React_Native.ipa'
+        artifact: 'iOS_com.docutain_sdk_example_react_native'
+        publishLocation: 'pipeline'
+
+  - job: 'TestiOS'
+    displayName: 'NUnit Test iOS'
+    dependsOn: BuildiOS
+    condition: eq(variables.DoTestiOS, true)
+    pool:
+     vmImage: macOS-13
+
+    steps:
+    - checkout: git://Docutain SDK/AppiumTestDocutainSDK
+  
+    - task: UseDotNet@2
+      displayName: 'Install .NET Core SDK'
+      inputs:
+        version: 5.x
+        packageType: sdk
+        performMultiLevelLookup: true
+        includePreviewVersions: true # Required for preview versions
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'build'        
+        projects: 'BrowserStack/BrowserStack.csproj'
+      displayName: 'Build NUint Test'
+    
+    - task: BrowserStackConfig@0
+      inputs:
+        BrowserStackServiceEndPoint: 'BrowserStack Connection'
+        browserstackLocal: true
+        bsLocalOptions: 'verbose'        
+    - task: DownloadPipelineArtifact@2
+      continueOnError: true
+      inputs:
+        buildType: 'specific'
+        project: '17062a62-977d-4b6d-a8eb-3f67a5730b2b'
+        definition: '20'
+        specificBuildWithTriggering: true
+        buildVersionToDownload: 'latest'
+        targetPath: '$(Pipeline.Workspace)'
+
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        buildType: current
+        targetPath: '$(Pipeline.Workspace)'
+
+# file listing macos
+    - task: CmdLine@2
+      displayName: 'List files'
+      inputs:
+        script: |
+          find -f $(Pipeline.Workspace)/*
+
+    - task: BrowserStackAppUploader@0
+      continueOnError: true
+      inputs:
+        appPath: '$(Pipeline.Workspace)/iOS_com.docutain_sdk_example_react_native/Docutain_SDK_Example_React_Native.ipa'
+        appCustomId: 'iOS_com.docutain_sdk_example_react_native'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build NUint Test'
+      inputs:
+        command: 'test'
+        testRunTitle: 'Docutain.SDK.React-Native iOS'
+        projects: 'BrowserStack/BrowserStack.csproj'
+#        arguments: '--filter FullyQualifiedName\!~ReportGeneration -- NUnit.TestOutputXml=TestXML -- NUnit.WorkDirectory=$(Agent.TempDirectory)'
+        arguments: ' -- NUnit.TestOutputXml=TestXML -- NUnit.WorkDirectory=$(Agent.TempDirectory)'
+      continueOnError: true
+      env:
+        DOCUTAIN_SDK_TESTAPP: 'ios_react_nativeTestApp'
+        BROWSERSTACK_BUILD_NAME: azure-Docutain.SDK.React-Native-iOS-$(Build.BuildId)
+#        CAPABILITIES_FILENAME: capabilities.yml
+#        BROWSERSTACK_ANDROID_APP_ID: SimpleApp_Android
+#        BROWSERSTACK_IOS_APP_ID: SimpleApp_iOS
+#        BROWSERSTACK_APP_ID: <Test_App>
+
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'NUnit'
+        testResultsFiles: '**/B*.xml'
+        searchFolder: '$(Agent.TempDirectory)'
+        testRunTitle: 'Docutain.SDK.React-Native iOS Azure Test Results ' 
+
+# Wird aktuell nicht gefunden
+    - task: BrowserStackResults@1
+      inputs:
+        browserstackProduct: 'App Automate'              
+
+
