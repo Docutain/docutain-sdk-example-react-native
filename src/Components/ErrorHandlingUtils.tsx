@@ -7,6 +7,8 @@
 */
 
 import DocutainSDK from '@docutain/react-native-docutain-sdk';
+import { Alert } from 'react-native';
+import RNFS from 'react-native-fs';
 
 export class ErrorHandlingUtils {
   public static exception(functionName: string, ex:any) {
@@ -19,7 +21,7 @@ export class ErrorHandlingUtils {
 
   public static async DocutainError(functionName: string)  {
     // get the latest error message
-    const text: string = functionName +" failed: " + await DocutainSDK.getLastError();
+    const text: string = "DOCUTAIN Error\n\n" + functionName +" failed: " + await DocutainSDK.getLastError();
     console.error(text);
     // copy trace if needed
     const traceFile:string = await DocutainSDK.getTraceFile();
@@ -27,6 +29,15 @@ export class ErrorHandlingUtils {
     // @ts-ignore
     // eslint-disable-next-line no-alert
     alert(text);
+    try{
+      console.log("copyFile to" + RNFS.DownloadDirectoryPath+"/Docutain.txt");
+      await RNFS.copyFile(traceFile,RNFS.DownloadDirectoryPath+"/Docutain.txt");
+    }
+    catch(ex)
+    {
+      console.log("copyFile exeption: " + ex);
+      alert(ex);
+    }
     return false;
   }
   

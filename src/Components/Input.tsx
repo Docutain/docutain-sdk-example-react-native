@@ -1,3 +1,11 @@
+/**
+ *   Docutain SDK React Native
+ *   Copyright (c) INFOSOFT Informations- und Dokumentationssysteme GmbH. All rights reserved.
+ *
+ *   Docutain SDK React Native is a commercial product and requires a license.
+ *   Details found in the LICENSE file in the root directory of this source tree.
+ */
+
 import React from "react";
 import { Optional } from 'utility-types';
 import { View, Text, StyleSheet } from "react-native";
@@ -23,7 +31,7 @@ export class Input extends React.Component <InputProps>{
                 <Text>{this.props.Label}</Text>
             </View>
             <View style={styles.inputContainer}>
-                <Text>{this.props.Text}</Text>
+                <Text testID={this.props.Label}>{this.props.Text}</Text>
             </View>
         </View>
 )}        
